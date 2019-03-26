@@ -372,6 +372,7 @@ class ReturnCodeInspector(Prototype):
 
         self._response_sets = config.get('responseSets')
         self._retries = config.get('retries')
+        self._return_codes = ReturnCodes.codes
 
     def process_observation(self, obs: Observation) -> Observation:
         for response_set in self._response_sets:
@@ -387,11 +388,11 @@ class ReturnCodeInspector(Prototype):
                 continue
 
             # Get error message of the return code.
-            error_values = ReturnCodes.codes.get(return_code)
+            error_values = self._return_codes.get(return_code)
             attempts = obs.get('attempts', 0)
 
             # Retry measurement.
-            if error_values and attempts < self._retries:
+            if error_values and error_values[1] and attempts < self._retries:
                 obs.set('attempts', attempts + 1)
                 obs.set('corrupted', False)
                 obs.set('nextReceiver', 0)
